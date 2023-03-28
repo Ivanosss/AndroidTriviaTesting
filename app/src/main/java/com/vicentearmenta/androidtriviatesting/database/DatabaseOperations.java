@@ -7,7 +7,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.google.android.material.color.utilities.Score;
 import com.vicentearmenta.androidtriviatesting.models.Answer;
 import com.vicentearmenta.androidtriviatesting.models.Question;
 
@@ -89,6 +91,7 @@ public class DatabaseOperations {
             // ! para negación
             this.open();
         }
+        Log.v("VICENTE", questionAlreadyAsked);
 
         String questionId = null;
         String questionText = null;
@@ -190,4 +193,45 @@ public class DatabaseOperations {
 
         return nextQuestion;
     }
+
+    public void updateUserScore(String userId, String score) {
+        if (!mDatabase.isOpen()) {
+            this.open();
+        }
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_RS_SCORE, score);
+        mDatabase.update(DatabaseHelper.TABLE_RESULT, values,
+                DatabaseHelper.COLUMN_RS_ID + " = ?", new String[]{userId});
+        mDatabase.close();
+    }
+    public List<String> getHighScores() {
+        List<String> highScores = new ArrayList<>();
+
+        if (!mDatabase.isOpen()) {
+            this.open();
+        }
+
+        Cursor cursor = mDatabase.query(
+                DatabaseHelper.TABLE_RESULT,
+                new String[]{DatabaseHelper.COLUMN_RS_USERNAME, DatabaseHelper.COLUMN_RS_SCORE},
+                null,
+                null,
+                null,
+                null,
+                DatabaseHelper.COLUMN_RS_SCORE + " DESC",
+                "5"
+        );
+
+        while (cursor.moveToNext()) {
+            String username = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_RS_USERNAME));
+            int score = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_RS_SCORE));
+            highScores.add(username + ": " + score);
+        }
+
+        cursor.close();
+        this.close();
+
+        return highScores;
+    }
+
 }

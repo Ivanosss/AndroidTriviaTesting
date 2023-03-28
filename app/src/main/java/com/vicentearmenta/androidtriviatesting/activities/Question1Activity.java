@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.vicentearmenta.androidtriviatesting.R;
 import com.vicentearmenta.androidtriviatesting.database.DatabaseOperations;
@@ -57,6 +58,8 @@ public class Question1Activity extends AppCompatActivity {
 
         questionsAlreadyAsked = questionsAlreadyAsked + "," + question.getQuestionId();
 
+        Toast.makeText(this, questionsAlreadyAsked, Toast.LENGTH_LONG).show();
+
         List<Answer> answers = question.getAllAnswers();
 
         for(int i = 0; i < 4; i++){
@@ -82,9 +85,13 @@ public class Question1Activity extends AppCompatActivity {
         binding.nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                int score = evaluateAnswerSelection(binding.rgAnswers, binding.rgAnswers.getCheckedRadioButtonId());
+
                 Intent intent = new Intent(Question1Activity.this, Question2Activity.class);
                 intent.putExtra("USERID", userId);
                 intent.putExtra("QUESTIONS", questionsAlreadyAsked);
+                intent.putExtra("SCORE", score);
                 startActivity(intent);
             }
         });
